@@ -1,0 +1,7 @@
+{
+	"extends": ["oxlint:recommended"],
+	"rules": {
+		"no-unused-vars": "warn",
+		"no-console": "off"
+	}
+}

@@ -13,13 +13,13 @@ const serverController = new ServerController(createServer);
 
 // Función para configurar el servidor HTTP
 function createHttpServer() {
-  return http.createServer((req, res) => {
-    if (req.method === "POST" && req.url === "/servers") {
-      serverController.create(req, res);
-    } else {
-      serverController.handleStaticFiles(req, res);
-    }
-  });
+	return http.createServer((req, res) => {
+		if (req.method === "POST" && req.url === "/servers") {
+			serverController.create(req, res);
+		} else {
+			serverController.handleStaticFiles(req, res);
+		}
+	});
 }
 
 // Crear y configurar el servidor HTTP
@@ -28,5 +28,5 @@ const httpServer = createHttpServer();
 // Iniciar el servidor HTTP
 const PORT = process.env.PORT || 3000;
 httpServer.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
+	console.log(`Server running at http://localhost:${PORT}`);
 });

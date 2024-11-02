@@ -1,5 +1,7 @@
 ./src
-.gitignore
 node_modules
+.gitignore
+.biomerc.json
+.oxlintrc.json
 tsconfig.json
 tsconfig-paths.json
