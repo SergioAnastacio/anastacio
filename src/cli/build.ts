@@ -2,7 +2,7 @@ import { readdirSync, writeFileSync } from "node:fs";
 import { join, parse, relative } from "node:path";
 import { build } from "esbuild";
 
-async function buildApp() {
+export async function buildApp() {
 	const projectRoot = process.cwd();
 	const srcPath = join(projectRoot, "src");
 	const pagesPath = join(srcPath, "pages");

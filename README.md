@@ -6,7 +6,7 @@
 # Anastacio
 [![npm version](https://img.shields.io/npm/v/anastacio-beta.svg)](https://www.npmjs.com/package/anastacio-beta
 )
-![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/SergioAnastacio/anastacio/main)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/SergioAnastacio/anastacio/main.yml)
 
 Anastacio es un framework para la creación de aplicaciones en React + Typescript  y APIS con Express.js + Typescript.
 
