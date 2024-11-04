@@ -1,33 +1,30 @@
 #!/usr/bin/env node
 
-import http from "node:http";
-import { ServerRepository } from "../infrastructure/repositories/ServerRepository.js";
-import { ServerService } from "../domain/services/ServerService.js";
-import { CreateServer } from "../application/use-cases/CreateServer.js";
-import { ServerController } from "../presentation/controllers/ServerController.js";
+import { StartProdServer } from "../application/use-cases/StartProdServer.js";
+import { ProdController } from "../presentation/controllers/ProdController.js";
 
 interface StartAppOptions {
 	port?: number;
 }
 
-export function startApp(options: StartAppOptions): void {
-	const serverRepository = new ServerRepository();
-	const serverService = new ServerService(serverRepository);
-	const createServer = new CreateServer(serverService);
-	const serverController = new ServerController(createServer);
+export async function startApp(options: StartAppOptions): Promise<void> {
+	const startProdServer = new StartProdServer(options);
+	const prodController = new ProdController(startProdServer);
 
-	const server = http.createServer(
-		(req: http.IncomingMessage, res: http.ServerResponse) => {
-			if (req.method === "POST" && req.url === "/servers") {
-				serverController.create(req, res);
-			} else {
-				serverController.handleStaticFiles(req, res);
-			}
-		},
-	);
+	try {
+		await prodController.start();
+	} catch (err) {
+		console.error("Failed to start prod server:", err);
+	}
 
-	const PORT = options.port || 3000;
-	server.listen(PORT, () => {
-		console.log(`Server running at http://localhost:${PORT}`);
+	// Escuchar señales de terminación para cerrar los servidores
+	process.on("SIGINT", () => {
+		prodController.close();
+		process.exit();
+	});
+	process.on("SIGTERM", () => {
+		prodController.close();
+		process.exit();
 	});
 }
+

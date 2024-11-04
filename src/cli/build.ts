@@ -73,5 +73,3 @@ export async function buildApp() {
 		process.exit(1);
 	}
 }
-
-buildApp();

@@ -1,6 +1,7 @@
 ./src
 node_modules
 .gitignore
+.github/
 .biomerc.json
 .oxlintrc.json
 tsconfig.json

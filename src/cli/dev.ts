@@ -1,31 +1,30 @@
 #!/usr/bin/env node
 
-import http from "node:http";
-import { ServerRepository } from "../infrastructure/repositories/ServerRepository.js";
-import { ServerService } from "../domain/services/ServerService.js";
-import { CreateServer } from "../application/use-cases/CreateServer.js";
-import { ServerController } from "../presentation/controllers/ServerController.js";
+import { StartDevServer } from "../application/use-cases/StartDevServer.js";
+import { DevController } from "../presentation/controllers/DevController.js";
 
 interface DevAppOptions {
 	port?: number;
 }
 
-export function devApp(options: DevAppOptions) {
-	const serverRepository = new ServerRepository();
-	const serverService = new ServerService(serverRepository);
-	const createServer = new CreateServer(serverService);
-	const serverController = new ServerController(createServer);
+export async function devApp(options: DevAppOptions): Promise<void> {
+	const startDevServer = new StartDevServer(options);
+	const devController = new DevController(startDevServer);
 
-	const server = http.createServer((req, res) => {
-		if (req.method === "POST" && req.url === "/servers") {
-			serverController.create(req, res);
-		} else {
-			serverController.handleStaticFiles(req, res);
-		}
+	try {
+		await devController.start();
+	} catch (err) {
+		console.error("Failed to start dev server:", err);
+	}
+
+	// Escuchar señales de terminación para cerrar los servidores
+	process.on("SIGINT", () => {
+		devController.close();
+		process.exit();
 	});
-
-	const PORT = options.port || 3000;
-	server.listen(PORT, () => {
-		console.log(`Dev server running at http://localhost:${PORT}`);
+	process.on("SIGTERM", () => {
+		devController.close();
+		process.exit();
 	});
 }
+

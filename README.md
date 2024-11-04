@@ -23,6 +23,8 @@ anastacio/
 │   │   └── cli.ts 
 │   ├── cli/ 
 │   │   ├── build.ts 
+│   │   ├── dev.ts
+│   │   ├── dev.ts
 │   │   ├── dev.ts 
 │   │   └── start.ts 
 │   ├── domain/ 
