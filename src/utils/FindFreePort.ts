@@ -2,7 +2,7 @@
 import net from "node:net";
 
 export async function FindFreePort(port: number): Promise<number> {
-	return new Promise((resolve, reject) => {
+	return new Promise((resolve) => {
 		const server = net.createServer();
 		server.unref();
 		server.on("error", () => {

@@ -1,5 +1,5 @@
 //TODO : Mejorar el sistema de rutas para que sea mas flexible y permita rutas anidadas
-//TODO : Principalmente cuando hablamos de Layouts , componentes compartidos , OUTLETS. 
+//TODO : Principalmente cuando hablamos de Layouts , componentes compartidos , OUTLETS.
 
 import type { Plugin } from "esbuild";
 import { readdirSync, writeFileSync } from "node:fs";
@@ -21,7 +21,9 @@ export const RouterPlugin = (): Plugin => ({
 					const { name, ext } = parse(entry.name);
 					const relativePath = `./${relative(srcDir, join(dir, entry.name))}`;
 					const routePath =
-						baseRoute === "/" ? `/${name.toLowerCase()}` : `${baseRoute}/${name}`.toLowerCase();
+						baseRoute === "/"
+							? `/${name.toLowerCase()}`
+							: `${baseRoute}/${name}`.toLowerCase();
 
 					if (entry.isFile() && ext === ".tsx") {
 						const componentName = name.charAt(0).toUpperCase() + name.slice(1);
@@ -32,7 +34,10 @@ export const RouterPlugin = (): Plugin => ({
 						if (name.toLowerCase() === "index" && baseRoute === "/") {
 							routes += `      <Route path="/" element={<${componentName} />} index />\n`;
 						} else {
-							const adjustedRoutePath = routePath.replace(new RegExp(`/${name.toLowerCase()}$`), '');
+							const adjustedRoutePath = routePath.replace(
+								new RegExp(`/${name.toLowerCase()}$`),
+								"",
+							);
 							routes += `      <Route path="${adjustedRoutePath.replace(/\/\//g, "/")}" element={<${componentName} />} />\n`;
 						}
 					} else if (entry.isDirectory()) {

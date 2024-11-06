@@ -29,6 +29,7 @@ export const staticFileController = async (
 			res.end(file.content);
 		}
 	} catch (error) {
+    console.error("Error:", error);
 		// Si no se encuentra el archivo, servir index.html para permitir que React maneje las rutas
 		const indexPath = path.join(rootFolder, "index.html");
 		try {
@@ -40,7 +41,8 @@ export const staticFileController = async (
 				res.writeHead(200, { "Content-Type": indexFile.contentType });
 				res.end(indexFile.content);
 			}
-		} catch (indexError) {
+		} catch (error) {
+      console.error("Error:", error);
 			res.writeHead(404, { "Content-Type": "text/html" });
 			res.end("<h1>404 Not Found</h1>");
 		}

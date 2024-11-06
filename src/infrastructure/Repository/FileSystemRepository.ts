@@ -1,6 +1,5 @@
 // src/Infrastructure/Repository/FileSystemRepository.ts
 import type { IFileSystemRepository } from "../IRepository/IFileSystemRepository.js";
-import { File } from "../../dominio/entities/File.js";
 import fs from "node:fs/promises";
 import path from "node:path";
 
