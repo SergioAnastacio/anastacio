@@ -1,30 +1,22 @@
-#!/usr/bin/env node
-
-import { StartDevServer } from "../application/use-cases/StartDevServer.js";
-import { DevController } from "../presentation/controllers/DevController.js";
+import { HttpServer } from "../infrastructure/webserver/HttpServer.js";
+import { ServerMode } from "../infrastructure/webserver/ServerMode.js";
 
 interface DevAppOptions {
-	port?: number;
+	port: number;
 }
 
 export async function devApp(options: DevAppOptions): Promise<void> {
-	const startDevServer = new StartDevServer(options);
-	const devController = new DevController(startDevServer);
+	//Instanciar un servidor en modo desarollo
+	//Configuracion
+	const hostname = "127.0.0.1"; // o localhost
+	const port = options.port;
+	const wsPort = 3001;
+	const mode = ServerMode.Development;
+	//Instanciar el server
+	const server = new HttpServer(hostname, port, wsPort, mode);
+	server.start(); //Llamamos su metodo start
 
-	try {
-		await devController.start();
-	} catch (err) {
-		console.error("Failed to start dev server:", err);
-	}
-
-	// Escuchar señales de terminación para cerrar los servidores
-	process.on("SIGINT", () => {
-		devController.close();
-		process.exit();
-	});
-	process.on("SIGTERM", () => {
-		devController.close();
-		process.exit();
-	});
+	//Procesar las señales de terminacion
+	process.on("SIGINT", () => server.handleSessionStop("SIGINT"));
+	process.on("SIGTERM", () => server.handleSessionStop("SIGTERM"));
 }
-

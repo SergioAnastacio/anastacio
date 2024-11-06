@@ -1,36 +1,49 @@
-import type { Plugin } from 'esbuild';
-import { readdirSync, writeFileSync } from 'node:fs';
-import { join, parse, relative } from 'node:path';
+//TODO : Mejorar el sistema de rutas para que sea mas flexible y permita rutas anidadas
+//TODO : Principalmente cuando hablamos de Layouts , componentes compartidos , OUTLETS. 
 
-export const RouterPlugin = (pagesDir: string, outputDir: string): Plugin => ({
-    name: 'router-plugin',
-    setup(build) {
-        build.onStart(() => {
-            let imports = "";
-            let routes = "";
+import type { Plugin } from "esbuild";
+import { readdirSync, writeFileSync } from "node:fs";
+import { join, parse, relative } from "node:path";
 
-            function processDirectory(dir: string, baseRoute: string) {
-                const entries = readdirSync(dir, { withFileTypes: true });
+export const RouterPlugin = (): Plugin => ({
+	name: "router-plugin",
+	setup(build) {
+		build.onStart(() => {
+			const srcDir = join(process.cwd(), "src");
+			const PagesDir = join(srcDir, "pages");
+			let imports = "";
+			let routes = "";
 
-                for (const entry of entries) {
-                    const { name, ext } = parse(entry.name);
-                    const relativePath = `./${relative(outputDir, join(dir, entry.name))}`;
-                    const routePath = name === "index" ? baseRoute : `${baseRoute}/${name}`.toLowerCase();
+			function processDirectory(dir: string, baseRoute: string) {
+				const entries = readdirSync(dir, { withFileTypes: true });
 
-                    if (entry.isFile() && ext === ".tsx") {
-                        const componentName = name.charAt(0).toUpperCase() + name.slice(1);
-                        const importPath = relativePath.replace(/\\/g, "/").replace(/\.tsx$/, "");
-                        imports += `import ${componentName} from '${importPath}';\n`;
-                        routes += `      <Route path="${routePath.replace(/\/\//g, "/")}" element={<${componentName} />} />\n`;
-                    } else if (entry.isDirectory()) {
-                        processDirectory(join(dir, entry.name), routePath);
-                    }
-                }
-            }
+				for (const entry of entries) {
+					const { name, ext } = parse(entry.name);
+					const relativePath = `./${relative(srcDir, join(dir, entry.name))}`;
+					const routePath =
+						baseRoute === "/" ? `/${name.toLowerCase()}` : `${baseRoute}/${name}`.toLowerCase();
 
-            processDirectory(pagesDir, "/");
+					if (entry.isFile() && ext === ".tsx") {
+						const componentName = name.charAt(0).toUpperCase() + name.slice(1);
+						const importPath = relativePath
+							.replace(/\\/g, "/")
+							.replace(/\.tsx$/, "");
+						imports += `import ${componentName} from '${importPath}';\n`;
+						if (name.toLowerCase() === "index" && baseRoute === "/") {
+							routes += `      <Route path="/" element={<${componentName} />} index />\n`;
+						} else {
+							const adjustedRoutePath = routePath.replace(new RegExp(`/${name.toLowerCase()}$`), '');
+							routes += `      <Route path="${adjustedRoutePath.replace(/\/\//g, "/")}" element={<${componentName} />} />\n`;
+						}
+					} else if (entry.isDirectory()) {
+						processDirectory(join(dir, entry.name), routePath);
+					}
+				}
+			}
 
-            const routerContent = `
+			processDirectory(PagesDir, "/");
+
+			const routerContent = `
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 ${imports}
@@ -45,7 +58,7 @@ ${routes}    </Routes>
 export default AppRouter;
             `;
 
-            writeFileSync(join(outputDir, "AppRouter.tsx"), routerContent);
-        });
-    },
+			writeFileSync(join(srcDir, "AppRouter.tsx"), routerContent);
+		});
+	},
 });

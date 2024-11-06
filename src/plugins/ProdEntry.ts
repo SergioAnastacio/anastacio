@@ -1,12 +1,13 @@
-import type { Plugin } from 'esbuild';
-import { writeFileSync } from 'node:fs';
-import { join } from 'node:path';
+import type { Plugin } from "esbuild";
+import { writeFileSync } from "node:fs";
+import { join } from "node:path";
 
-export const ProdPlugin = (outputDir: string): Plugin => ({
-    name: 'prod-plugin',
-    setup(build) {
-        build.onEnd(() => {
-            const htmlContent = `
+export const ProdPlugin = (): Plugin => ({
+	name: "prod-plugin",
+	setup(build) {
+		build.onEnd(() => {
+			const outputDir = join(process.cwd(), "dist");
+			const htmlContent = `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -21,7 +22,7 @@ export const ProdPlugin = (outputDir: string): Plugin => ({
 </body>
 </html>
             `;
-            writeFileSync(join(outputDir, 'index.html'), htmlContent);
-        });
-    },
+			writeFileSync(join(outputDir, "index.html"), htmlContent);
+		});
+	},
 });

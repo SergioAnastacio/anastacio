@@ -1,30 +1,19 @@
-#!/usr/bin/env node
+import { HttpServer } from "../infrastructure/webserver/HttpServer.js";
+import { ServerMode } from "../infrastructure/webserver/ServerMode.js";
 
-import { StartProdServer } from "../application/use-cases/StartProdServer.js";
-import { ProdController } from "../presentation/controllers/ProdController.js";
-
-interface StartAppOptions {
-	port?: number;
+interface startAppOptions {
+	port: number;
 }
-
-export async function startApp(options: StartAppOptions): Promise<void> {
-	const startProdServer = new StartProdServer(options);
-	const prodController = new ProdController(startProdServer);
-
-	try {
-		await prodController.start();
-	} catch (err) {
-		console.error("Failed to start prod server:", err);
-	}
-
-	// Escuchar señales de terminación para cerrar los servidores
-	process.on("SIGINT", () => {
-		prodController.close();
-		process.exit();
-	});
-	process.on("SIGTERM", () => {
-		prodController.close();
-		process.exit();
-	});
+export async function startApp(options: startAppOptions): Promise<void> {
+	//Configuracion del server
+	const hostname = "127.0.0.1"; // o localhost
+	const port = options.port;
+	const wsPort = 3001;
+	const mode = ServerMode.Production;
+	// Instanciar el server
+	const server = new HttpServer(hostname, port, wsPort, mode);
+	server.start(); //Llamamos su metodo start
+	//Procesar las señales de terminacion
+	process.on("SIGINT", () => server.handleSessionStop("SIGINT"));
+	process.on("SIGTERM", () => server.handleSessionStop("SIGTERM"));
 }
-
