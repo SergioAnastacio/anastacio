@@ -10,7 +10,7 @@ export const MinifyCSSPlugin = (): Plugin => ({
 			await Timer("CSS minification", async () => {
 				const srcDir = join(process.cwd(), "src");
 				const outputDir = join(process.cwd(), "dist");
-				const cssFilePath = join(srcDir, "index.css");
+				const cssFilePath = join(srcDir, "styles.css");
 				try {
 					const cssContent = readFileSync(cssFilePath, "utf8");
 					const minifiedCSS = minifyCSS(cssContent);

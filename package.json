@@ -22,18 +22,22 @@
     "@types/node": "^14.0.0",
     "@types/send": "^0.17.4",
     "@types/sharp": "^0.31.1",
+    "@types/tailwindcss": "^3.0.11",
     "@types/ws": "^8.5.12",
     "oxlint": "^0.10.3",
     "tsconfig-paths": "^4.2.0",
+    "@types/autoprefixer": "^9.7.2",
+    "@types/cssnano": "^5.0.0",
     "typescript": "^4.9.5"
   },
   "dependencies": {
+    "autoprefixer": "^10.4.20",
     "colors": "^1.4.0",
     "commander": "^12.1.0",
+    "cssnano": "^7.0.6",
     "esbuild": "^0.24.0",
-    "express": "^4.21.1",
-    "send": "^1.1.0",
     "sharp": "^0.33.5",
+    "tailwindcss": "^3.4.14",
     "ws": "^8.18.0"
   },
   "files": [

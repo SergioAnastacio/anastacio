@@ -24,6 +24,11 @@ export const MinifyImagesPlugin = (): Plugin => ({
 				const imageExtensions = [".jpg", ".jpeg", ".png", ".svg", ".gif"];
 				const convertibleExtensions = [".jpg", ".jpeg", ".png"];
 
+				// Crear el directorio de salida si no existe
+				if (!existsSync(outputDir)) {
+					mkdirSync(outputDir, { recursive: true });
+				}
+
 				// Copiar el directorio src/public a dist/public
 				copyDirectory(srcDir, outputDir);
 
@@ -126,7 +131,7 @@ const processImagesInDir = async (
 	convertibleExtensions: string[],
 ) => {
 	const files = readdirSync(dir);
-	for (const file of files) {
+	const tasks = files.map(async (file) => {
 		const filePath = join(dir, file);
 		const stats = statSync(filePath);
 		if (stats.isDirectory()) {
@@ -162,5 +167,6 @@ const processImagesInDir = async (
 				}
 			}
 		}
-	}
+	});
+	await Promise.all(tasks);
 };

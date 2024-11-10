@@ -23,11 +23,11 @@ export class HttpServer implements IHttpServer {
 	) {
 		const srcDir = join(process.cwd(), "src");
 		const outputDir = join(process.cwd(), "dist");
-		this.server = http.createServer(staticFileController);
+		this.server = http.createServer(staticFileController(outputDir)); // Pasar el directorio de salida al controlador
 		this.hotReloadServer = new HotReloadServer(wsPort);
 		this.compiler = new EsbuildCompiler(
 			[`${srcDir}/index.tsx`],
-			outputDir,
+			join(outputDir, "bundler.js"),
 			mode,
 			this.hotReloadServer,
 		);
