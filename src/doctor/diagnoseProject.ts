@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, writeFileSync } from "node:fs";
 import { join, relative, sep } from "node:path";
 import { createFrameworkContext, findAnastacioConfigPath } from "../core/index.js";
 import { writeRoutesManifest } from "../router/index.js";
@@ -8,6 +8,22 @@ import type {
 	DiagnosticReport,
 	RouteDefinition,
 } from "../shared/contracts/index.js";
+
+const ROOT_LAYOUT_FILE_NAMES = ["layout.tsx", "layout.jsx"];
+const PAGE_FILE_NAMES = ["page.tsx", "page.jsx"];
+const LOADING_FILE_NAMES = ["loading.tsx", "loading.jsx"];
+const ERROR_FILE_NAMES = [
+	"error.tsx",
+	"error.jsx",
+	"errorPage.tsx",
+	"errorPage.jsx",
+];
+const NOT_FOUND_FILE_NAMES = [
+	"notfound.tsx",
+	"notfound.jsx",
+	"not-found.tsx",
+	"not-found.jsx",
+];
 
 export interface DoctorReport {
 	rootDir: string;
@@ -166,6 +182,25 @@ function collectDiagnostics(
 		});
 	}
 
+	collectDuplicateRouteDiagnostics(routes, diagnostics);
+
+	if (existsSync(appDir)) {
+		collectDirectoryShapeDiagnostics(config, diagnostics);
+		collectRouteMetadataDiagnostics(config, routes, diagnostics);
+	}
+
+	return diagnostics.sort(
+		(left, right) =>
+			severityRank(left.severity) - severityRank(right.severity) ||
+			left.code.localeCompare(right.code) ||
+			(left.file ?? "").localeCompare(right.file ?? ""),
+	);
+}
+
+function collectDuplicateRouteDiagnostics(
+	routes: RouteDefinition[],
+	diagnostics: Diagnostic[],
+): void {
 	const routeCounts = new Map<string, number>();
 	for (const route of routes) {
 		routeCounts.set(route.path, (routeCounts.get(route.path) ?? 0) + 1);
@@ -192,9 +227,7 @@ function collectDiagnostics(
 	}
 
 	for (const [signature, signatureRoutes] of routesBySignature.entries()) {
-		const distinctPaths = new Set(
-			signatureRoutes.map((route) => route.path),
-		);
+		const distinctPaths = new Set(signatureRoutes.map((route) => route.path));
 		if (distinctPaths.size < 2) {
 			continue;
 		}
@@ -212,12 +245,157 @@ function collectDiagnostics(
 				"Rename or reorganize dynamic segments so each semantic route shape is unique.",
 		});
 	}
+}
 
-	return diagnostics.sort(
-		(left, right) =>
-			severityRank(left.severity) - severityRank(right.severity) ||
-			left.code.localeCompare(right.code),
-	);
+function collectDirectoryShapeDiagnostics(
+	config: AnastacioConfig,
+	diagnostics: Diagnostic[],
+): void {
+	walkAppDirectory(config.paths.appDir, (directory) => {
+		const directoryEntries = readdirSync(directory, { withFileTypes: true });
+		const fileNames = new Set(
+			directoryEntries.filter((entry) => entry.isFile()).map((entry) => entry.name),
+		);
+		const relativeDirectory = toProjectRelative(config.rootDir, directory);
+		const pageCount = countKnownFiles(fileNames, PAGE_FILE_NAMES);
+		const layoutCount = countKnownFiles(fileNames, ROOT_LAYOUT_FILE_NAMES);
+		const loadingCount = countKnownFiles(fileNames, LOADING_FILE_NAMES);
+		const errorCount = countKnownFiles(fileNames, ERROR_FILE_NAMES);
+		const notFoundCount = countKnownFiles(fileNames, NOT_FOUND_FILE_NAMES);
+
+		if (pageCount > 1) {
+			diagnostics.push({
+				code: "MULTIPLE_PAGE_FILES",
+				severity: "error",
+				message: "More than one page file was found in the same route directory.",
+				file: relativeDirectory,
+				suggestion:
+					"Keep a single page.tsx/page.jsx per route directory.",
+			});
+		}
+
+		if (layoutCount > 1) {
+			diagnostics.push({
+				code: "MULTIPLE_LAYOUT_FILES",
+				severity: "error",
+				message: "More than one layout file was found in the same directory.",
+				file: relativeDirectory,
+				suggestion:
+					"Keep a single layout.tsx/layout.jsx per directory.",
+			});
+		}
+
+		if (loadingCount > 1) {
+			diagnostics.push({
+				code: "MULTIPLE_LOADING_FILES",
+				severity: "error",
+				message: "More than one loading file was found in the same directory.",
+				file: relativeDirectory,
+				suggestion:
+					"Keep a single loading.tsx/loading.jsx per directory.",
+			});
+		}
+
+		if (errorCount > 1) {
+			diagnostics.push({
+				code: "MULTIPLE_ERROR_FILES",
+				severity: "error",
+				message: "More than one error boundary file was found in the same directory.",
+				file: relativeDirectory,
+				suggestion:
+					"Keep a single error.tsx/error.jsx or errorPage.tsx/errorPage.jsx per directory.",
+			});
+		}
+
+		if (notFoundCount > 1) {
+			diagnostics.push({
+				code: "MULTIPLE_NOT_FOUND_FILES",
+				severity: "error",
+				message: "More than one not-found file was found in the same directory.",
+				file: relativeDirectory,
+				suggestion:
+					"Keep a single notfound.tsx/notfound.jsx or not-found.tsx/not-found.jsx per directory.",
+			});
+		}
+
+		if (isDynamicDirectory(directory) && pageCount === 0 && !hasChildDirectories(directory)) {
+			diagnostics.push({
+				code: "EMPTY_DYNAMIC_ROUTE_DIRECTORY",
+				severity: "warning",
+				message:
+					"A dynamic route directory exists without a page file or nested child routes.",
+				file: relativeDirectory,
+				suggestion:
+					"Add a page.tsx file or nested route directories, or remove the unused dynamic segment.",
+			});
+		}
+
+		if (loadingCount > 0 && pageCount === 0 && !hasChildDirectories(directory)) {
+			diagnostics.push({
+				code: "ORPHAN_LOADING_FILE",
+				severity: "warning",
+				message:
+					"A loading file exists in a directory without a page file or nested child routes.",
+				file: relativeDirectory,
+				suggestion:
+					"Add a page.tsx or child route, or remove the unused loading file.",
+			});
+		}
+
+		if (errorCount > 0 && pageCount === 0 && !hasChildDirectories(directory)) {
+			diagnostics.push({
+				code: "ORPHAN_ERROR_FILE",
+				severity: "warning",
+				message:
+					"An error boundary file exists in a directory without a page file or nested child routes.",
+				file: relativeDirectory,
+				suggestion:
+					"Add a page.tsx or child route, or remove the unused error file.",
+			});
+		}
+
+		if (notFoundCount > 0 && pageCount === 0 && !hasChildDirectories(directory)) {
+			diagnostics.push({
+				code: "ORPHAN_NOT_FOUND_FILE",
+				severity: "warning",
+				message:
+					"A not-found file exists in a directory without a page file or nested child routes.",
+				file: relativeDirectory,
+				suggestion:
+					"Add a page.tsx or child route, or remove the unused not-found file.",
+			});
+		}
+	});
+}
+
+function collectRouteMetadataDiagnostics(
+	config: AnastacioConfig,
+	routes: RouteDefinition[],
+	diagnostics: Diagnostic[],
+): void {
+	for (const route of routes) {
+		const routeDirectory = join(config.rootDir, route.file, "..");
+		if (!route.layout) {
+			diagnostics.push({
+				code: "ROUTE_WITHOUT_LAYOUT",
+				severity: "info",
+				message: `Route "${route.path}" does not resolve to any layout file.`,
+				file: route.file,
+				suggestion:
+					"Add a nearby layout.tsx or a root src/app/layout.tsx if the route should share application chrome.",
+			});
+		}
+
+		if (route.hasLoading === false && hasKnownFile(routeDirectory, LOADING_FILE_NAMES)) {
+			diagnostics.push({
+				code: "LOADING_METADATA_MISMATCH",
+				severity: "warning",
+				message: `Route "${route.path}" appears to have a loading file that was not reflected in route metadata.`,
+				file: route.file,
+				suggestion: "Review route resolution for loading.tsx inheritance and metadata propagation.",
+			});
+		}
+	}
 }
 
 function writeDiagnosticsReport(
@@ -248,7 +426,22 @@ function severityRank(severity: Diagnostic["severity"]): number {
 	}
 }
 
-const ROOT_LAYOUT_FILE_NAMES = ["layout.tsx", "layout.jsx"];
+function walkAppDirectory(
+	directory: string,
+	visitor: (directory: string) => void,
+): void {
+	visitor(directory);
+	const entries = readdirSync(directory, { withFileTypes: true });
+	for (const entry of entries) {
+		if (entry.isDirectory()) {
+			walkAppDirectory(join(directory, entry.name), visitor);
+		}
+	}
+}
+
+function countKnownFiles(fileNames: Set<string>, candidates: string[]): number {
+	return candidates.filter((fileName) => fileNames.has(fileName)).length;
+}
 
 function hasKnownFile(directory: string, fileNames: string[]): boolean {
 	for (const fileName of fileNames) {
@@ -258,6 +451,17 @@ function hasKnownFile(directory: string, fileNames: string[]): boolean {
 	}
 
 	return false;
+}
+
+function hasChildDirectories(directory: string): boolean {
+	return readdirSync(directory, { withFileTypes: true }).some((entry) =>
+		entry.isDirectory(),
+	);
+}
+
+function isDynamicDirectory(directory: string): boolean {
+	const baseName = directory.split(/[\\/]/).pop() ?? "";
+	return baseName.startsWith("[") && baseName.endsWith("]");
 }
 
 function toRouteSignature(routePath: string): string {
