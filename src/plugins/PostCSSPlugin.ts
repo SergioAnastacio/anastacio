@@ -1,9 +1,9 @@
 import { readFileSync } from "node:fs";
+import tailwindPostcss from "@tailwindcss/postcss";
 import autoprefixer from "autoprefixer";
 import cssnano from "cssnano";
 import type { Plugin } from "esbuild";
 import postcss from "postcss";
-import tailwindcss from "tailwindcss";
 
 export const PostCSSPlugin = (): Plugin => ({
 	name: "postcss-plugin",
@@ -11,7 +11,7 @@ export const PostCSSPlugin = (): Plugin => ({
 		build.onLoad({ filter: /\.css$/ }, async (args) => {
 			const css = readFileSync(args.path, "utf8");
 			const result = await postcss([
-				tailwindcss,
+				tailwindPostcss(),
 				autoprefixer,
 				cssnano,
 			]).process(css, {
