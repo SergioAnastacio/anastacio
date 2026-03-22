@@ -1,142 +1,125 @@
-
-
->[!IMPORTANT] Version BETA Actualmente en Desarollo
-> La version BETA esta en pruebas y pronto se pasara a RC
-
 # Anastacio
-[![npm version](https://img.shields.io/npm/v/anastacio-beta.svg)](https://www.npmjs.com/package/anastacio-beta
-)
-![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/SergioAnastacio/anastacio/main.yml)
 
-Anastacio es un framework para la creación de aplicaciones en React + Typescript  y APIS con Express.js + Typescript.
+Anastacio es un framework React + TypeScript orientado a agentes, enfocado
+en arquitectura explicita, inspeccion nativa y evolucion segura del codigo.
 
+La apuesta de v2 no es competir por ser el framework mas completo. La apuesta
+es construir un framework que pueda explicar la estructura del proyecto como
+dato, de forma util para humanos y para tooling automatizado.
 
-## Estructura del Proyecto
-La estructura del proyecto sigue el patrón de arquitectura limpia y se divide en las siguientes capas:
-```
-anastacio/ 
-├── src/ 
-│   ├── application/ 
-│   ├── use-cases/ 
-│   │   └── CreateServer.ts 
-│   ├── bin/ 
-│   │   └── cli.ts 
-│   ├── cli/ 
-│   │   ├── build.ts 
-│   │   ├── dev.ts
-│   │   ├── dev.ts
-│   │   ├── dev.ts 
-│   │   └── start.ts 
-│   ├── domain/ 
-│   │   ├── entities/ 
-│   │   │   └── Server.ts 
-│   │   ├── interfaces/ 
-│   │   │   └── IServerRepository.ts 
-│   │   └── services/ 
-│   │       └── ServerService.ts 
-│   ├── infrastructure/ 
-│   │   └── repositories/ 
-│   │       └── ServerRepository.ts 
-│   ├── presentation/ 
-│   │   └── controllers/ 
-│   │       └── ServerController.ts 
-│   └── server.ts 
-├── package.json 
-├── README.md 
-├── tsconfig-paths.json 
-└── tsconfig.json
+## Estado del repositorio
 
-```
-- **Dominio**: Contiene las reglas de negocio y lógica de la aplicación.
-- **Infraestructura**: Incluye la configuración de la base de datos, servidores y otros servicios externos.
-- **Aplicación**: Maneja la lógica de la aplicación, casos de uso y servicios.
-- **Presentación**: Gestiona la interfaz de usuario y la interacción con el cliente.
+Este repositorio esta en transicion hacia **Anastacio v2**.
 
+La linea de trabajo de v2 vive en la rama `dev`. El objetivo actual no es
+cerrar todas las capacidades de un meta-framework moderno, sino consolidar un
+MVP enfocado y ejecutable.
 
-## Instalación
+## Direccion de v2
 
-Para instalar el framework usa el siguiente comando de NPX:
+Anastacio v2 se apoya en estas ideas:
+
+- `explicit over magic`
+- routing por archivos
+- manifests estructurados
+- diagnosticos utiles
+- comandos semanticos
+- evolucion segura del proyecto
+
+La idea central es simple:
+
+> Anastacio v2 debe ganar por claridad estructural, no por cantidad de
+> features.
+
+## Foco actual del MVP
+
+La primera etapa de v2 esta enfocada en:
+
+- `anastacio dev`
+- `anastacio build`
+- config loader basico
+- routing por archivos
+- layouts basicos
+- `routes.manifest.json`
+- `project-context.md`
+- `anastacio inspect`
+- `anastacio inspect --json`
+- `anastacio doctor` minimo
+
+Capacidades como server actions, generadores avanzados, graph profundo y SSR
+quedan para fases posteriores.
+
+## Documentos base
+
+La direccion actual de producto y arquitectura esta documentada aqui:
+
+- [Vision y arquitectura v2](./anastacio_v2_vision_y_arquitectura.md)
+- [MVP endurecido](./anastacio_v2_mvp_endurecido.md)
+- [Backlog Fase 1](./anastacio_v2_fase1_tareas.md)
+
+## Roadmap resumido
+
+### Fase 1
+
+Core utilizable e inspeccion minima:
+
+- CLI minima
+- build y dev server
+- router por archivos
+- `routes.manifest.json`
+- `inspect --json`
+
+### Fase 2
+
+Introspeccion util:
+
+- `project-context.md`
+- `diagnostics.json`
+- `doctor`
+- grafo simple de dependencias
+
+### Fase 3
+
+Automatizacion segura:
+
+- `explain <target>`
+- generadores iniciales
+- contratos de acciones
+
+## Comandos actuales del repositorio
+
+Mientras el core de v2 madura, estos scripts siguen disponibles:
 
 ```bash
-    npx create-anastacio-app myapp
+npm run build
+npm run lint
+npm run format
 ```
 
-## Uso
+## Contribucion
 
->[!NOTE] Uso de el comando Node  en la Version 22.10.0
-> Puedes usar el comando 
-> ```bash
->   node --run script
-> ```
-Para instalar las dependencias del proyecto, ejecute el siguiente comando:
+Si vas a trabajar sobre v2:
 
-### Start
-Para iniciar el servidor, utilice el siguiente comando:
+1. parte desde una rama de feature basada en la linea v2 activa;
+2. alinea cambios con la arquitectura v2 y el backlog de Fase 1;
+3. evita introducir features fuera del foco del MVP sin cerrar antes los
+   contratos base.
 
-```bash
-    node --run start
-```
-### Dev
-Para iniciar el servidor, de desarollo utilice el siguiente comando:
+## Arquitectura oficial v2
 
-```bash
-    node --run dev
-```
-### Build
+A partir de esta migracion, los modulos oficiales de Anastacio v2 son:
 
-Para compilar el proyecto, utiliza el siguiente comando:
-### Test
-Para ejecutar las pruebas, utiliza el siguiente comando:
-### Test coverage
-Para generar un informe de cobertura de pruebas, utiliza el siguiente comando:
-### Test E2E
-Para ejecutar pruebas end-to-end, utiliza el siguiente comando:
-### Lint
-Para analizar el código en busca de errores y problemas de estilo, utiliza el siguiente comando:
-### Formatt
-Para formatear el código, utiliza el siguiente comando:
+- `src/core`
+- `src/router`
+- `src/inspector`
+- `src/doctor`
+- `src/shared`
 
-## Contribución
-
-Si desea contribuir a este proyecto, por favor siga los siguientes pasos:
-
-1. Haga un fork del repositorio.
-2. Cree una nueva rama (`git checkout -b feature/nueva-funcionalidad`).
-3. Realice los cambios necesarios y haga commit (`git commit -m 'Añadir nueva funcionalidad'`).
-4. Empuje los cambios a la rama (`git push origin feature/nueva-funcionalidad`).
-5. Cree un Pull Request.
+Las carpetas heredadas (`src/adapters`, `src/applications`, `src/dominio` y
+partes antiguas de `src/infrastructure`) deben considerarse transicionales.
+No deben recibir nuevas capacidades estructurales mientras la migracion a v2
+este en curso.
 
 ## Licencia
 
-Este proyecto está licenciado bajo la Licencia MIT. Consulte el archivo `LICENSE` para obtener más detalles.
-
-## Características
-
-- **Modularidad**: Estructura modular que facilita la escalabilidad y el mantenimiento.
-- **TypeScript**: Escrito en TypeScript para aprovechar sus características de tipado estático.
-- **Arquitectura Limpia**: Sigue el patrón de arquitectura limpia para una separación clara de responsabilidades.
-- **Facilidad de Uso**: Comandos simples para iniciar, desarrollar y construir el proyecto.
-
-## Requisitos
->[!WARNING] Error con Node 23.0
->  Existe un error con Node 23.0  que no permite usar el comando npx Recomendamos usar la version 22.10.0
-- Node.js >= v22.10.0 
-- npm >= 10.9.0
-
-## Documentación
-
-> [!CAUTION] Documentacion incompleta
-> Documentacion en Camino ... cuando se termine de desarollar el core.
-
-Para más detalles sobre cómo utilizar Anastacio, por favor consulte la [documentación oficial](https://example.com/docs).
-
-## Roadmap
-
-- [ ] Completar la documentación
-- [ ] Añadir más pruebas unitarias
-- [ ] Mejorar la cobertura de pruebas E2E
-- [ ] Implementar nuevas características solicitadas por la comunidad
-
-## Agradecimientos
-
-Agradecemos a todos los contribuyentes y a la comunidad por su apoyo y colaboración en el desarrollo de Anastacio.
+MIT

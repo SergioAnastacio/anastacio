@@ -13,16 +13,21 @@ import {
 import { join, extname, basename } from "node:path";
 import sharp from "sharp";
 import { Timer } from "../utils/Timer.js";
+import type { AnastacioConfig } from "../shared/contracts/index.js";
 
-export const MinifyImagesPlugin = (): Plugin => ({
+export const MinifyImagesPlugin = (config: AnastacioConfig): Plugin => ({
 	name: "minify-images-plugin",
 	setup(build) {
 		build.onEnd(async () => {
 			await Timer("Image minification and conversion", async () => {
-				const srcDir = join(process.cwd(), "src/public");
-				const outputDir = join(process.cwd(), "dist/public");
+				const srcDir = config.paths.publicDir;
+				const outputDir = join(config.paths.outDir, "public");
 				const imageExtensions = [".jpg", ".jpeg", ".png", ".svg", ".gif"];
 				const convertibleExtensions = [".jpg", ".jpeg", ".png"];
+
+				if (!existsSync(srcDir)) {
+					return;
+				}
 
 				// Crear el directorio de salida si no existe
 				if (!existsSync(outputDir)) {

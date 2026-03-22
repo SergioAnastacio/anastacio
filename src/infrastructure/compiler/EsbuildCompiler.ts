@@ -1,6 +1,6 @@
 // src/infrastructure/compiler/EsbuildCompiler.ts
 import type esbuild from "esbuild";
-import { watch } from "node:fs";
+import { existsSync, watch } from "node:fs";
 import colors from "colors";
 import { type BuildOptions, context } from "esbuild";
 import { ServerMode } from "../webserver/ServerMode.js";
@@ -12,27 +12,30 @@ import { ProdPlugin } from "../../plugins/ProdEntry.js";
 import { MinifyImagesPlugin } from "../../plugins/MinifyImages.js";
 import { RouterPlugin } from "../../plugins/AppRouter.js";
 import { PostCSSPlugin } from "../../plugins/PostCSSPlugin.js";
+import type { AnastacioConfig } from "../../shared/contracts/index.js";
 
 export class EsbuildCompiler implements IEsbuildCompiler {
+	public config: AnastacioConfig;
 	public entryPoints: string[];
-	public outdir: string;
+	public outfile: string;
 	public mode: ServerMode;
 	private hotReloadServer?: HotReloadServer;
 	private ctx: esbuild.BuildContext | null = null;
 
 	constructor(
-		entryPoints: string[],
-		outdir: string,
+		config: AnastacioConfig,
 		mode: ServerMode,
 		hotReloadServer?: HotReloadServer,
 	) {
-		this.entryPoints = entryPoints;
-		this.outdir = outdir;
+		this.config = config;
+		this.entryPoints = [config.paths.entryFile];
+		this.outfile = config.paths.bundleFile;
 		this.mode = mode;
 		this.hotReloadServer = hotReloadServer;
 	}
 
 	async compile() {
+		this.validateInputs();
 		const plugins = this.getPlugins();
 		const buildOptions = this.getBuildOptions(plugins);
 
@@ -56,18 +59,18 @@ export class EsbuildCompiler implements IEsbuildCompiler {
 		switch (this.mode) {
 			case ServerMode.Development:
 				return [
-					DevPlugin(),
-					RouterPlugin(),
+					DevPlugin(this.config),
+					RouterPlugin(this.config),
 					PostCSSPlugin(), // Pasar el directorio de salida
-					MinifyImagesPlugin(),
+					MinifyImagesPlugin(this.config),
 				];
 			//Como no tenemos mas casos pasamos directo a production mode default
 			default:
 				return [
-					ProdPlugin(),
-					RouterPlugin(),
+					ProdPlugin(this.config),
+					RouterPlugin(this.config),
 					PostCSSPlugin(), // Pasar el directorio de salida
-					MinifyImagesPlugin(),
+					MinifyImagesPlugin(this.config),
 				];
 		}
 	}
@@ -75,7 +78,7 @@ export class EsbuildCompiler implements IEsbuildCompiler {
 	private getBuildOptions(plugins: esbuild.Plugin[]): BuildOptions {
 		return {
 			entryPoints: this.entryPoints,
-			outfile: this.outdir, // Mantener outfile para los archivos JavaScript
+			outfile: this.outfile,
 			bundle: true,
 			minify: this.mode === ServerMode.Production,
 			sourcemap: this.mode === ServerMode.Development,
@@ -89,7 +92,7 @@ export class EsbuildCompiler implements IEsbuildCompiler {
 				".jpeg": "dataurl",
 				".gif": "dataurl",
 				".ico": "dataurl",
-				 ".scss": "text", // Cambiar el loader de .css a .scss para evitar el procesamiento doble
+				".scss": "text",
 			},
 			define: { "process.env.NODE_ENV": `"${this.mode}"` },
 			plugins,
@@ -101,10 +104,14 @@ export class EsbuildCompiler implements IEsbuildCompiler {
 		console.log(formatTime(), "Watching for changes...");
 
 		watch(
-			"src",
+			this.config.paths.srcDir,
 			{ recursive: true, encoding: "utf8" },
 			async (eventType: string, filename: string | null) => {
 				if (filename) {
+					if (filename.replace(/\\/g, "/").endsWith("AppRouter.tsx")) {
+						return;
+					}
+
 					console.log(
 						colors.bgBlack(colors.yellow(`File ${filename} changed.`)),
 					);
@@ -124,6 +131,15 @@ export class EsbuildCompiler implements IEsbuildCompiler {
 		);
 	}
 
+	private validateInputs(): void {
+		if (!existsSync(this.config.paths.entryFile)) {
+			throw new Error(
+				`Entry file not found: ${this.config.paths.entryFile}. ` +
+					"Create the file or configure paths.entryFile in anastacio.config.ts.",
+			);
+		}
+	}
+
 	// Método para compilar el código
 	// ! No existe el método build en la interfaz IEsbuildCompiler
 	// ! Por lo que usamos el método rebuild
@@ -131,6 +147,8 @@ export class EsbuildCompiler implements IEsbuildCompiler {
 		await Timer("Build", async () => {
 			if (this.ctx) {
 				await this.ctx.rebuild();
+				await this.ctx.dispose();
+				this.ctx = null;
 			}
 		});
 		console.log("Build completed successfully.");
