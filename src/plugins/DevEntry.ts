@@ -2,8 +2,9 @@ import type { Plugin } from "esbuild";
 import { promises as fs } from "node:fs";
 import { join } from "node:path";
 import { createHash } from "node:crypto";
+import type { AnastacioConfig } from "../shared/contracts/index.js";
 
-export const DevPlugin = (): Plugin => ({
+export const DevPlugin = (config: AnastacioConfig): Plugin => ({
 	name: "dev-plugin",
 	setup(build) {
 		build.onEnd(() => {
@@ -21,7 +22,7 @@ export const DevPlugin = (): Plugin => ({
   <script src="bundler.js"></script>
   <script>
     // Conectar al servidor WebSocket
-    const ws = new WebSocket("ws://localhost:3001");
+    const ws = new WebSocket("ws://${config.dev.host}:${config.dev.wsPort}");
 
     // Escuchar mensajes del servidor WebSocket
     ws.onmessage = (event) => {
@@ -44,7 +45,7 @@ export const DevPlugin = (): Plugin => ({
 </body>
 </html>
             `;
-			const htmlPath = join(process.cwd(), "dist/index.html");
+			const htmlPath = join(config.paths.outDir, "index.html");
 
 			writeHtmlIfChanged(htmlPath, htmlContent).catch((error) =>
 				console.error("Error handling HTML file:", error),

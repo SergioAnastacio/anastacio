@@ -1,2 +1,7 @@
 node_modules/
 dist/
+.anastacio/
+github-recovery-codes.txt
+examples/*/dist/
+examples/*/node_modules/
+examples/*/.anastacio/

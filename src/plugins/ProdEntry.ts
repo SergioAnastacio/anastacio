@@ -2,12 +2,13 @@ import type { Plugin } from "esbuild";
 import { promises as fs } from "node:fs";
 import { join } from "node:path";
 import { createHash } from "node:crypto";
+import type { AnastacioConfig } from "../shared/contracts/index.js";
 
-export const ProdPlugin = (): Plugin => ({
+export const ProdPlugin = (config: AnastacioConfig): Plugin => ({
 	name: "prod-plugin",
 	setup(build) {
 		build.onEnd(async () => {
-			const outputDir = join(process.cwd(), "dist");
+			const outputDir = config.paths.outDir;
 			// Crear el archivo HTML
 			const htmlContent = `
 <!DOCTYPE html>
