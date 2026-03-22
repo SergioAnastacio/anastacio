@@ -1,6 +1,6 @@
+import { createFrameworkContext } from "../core/index.js";
 import { HttpServer } from "../infrastructure/webserver/HttpServer.js";
 import { ServerMode } from "../infrastructure/webserver/ServerMode.js";
-import { createFrameworkContext } from "../core/index.js";
 
 interface DevAppOptions {
 	port?: number;

@@ -9,4 +9,5 @@ export interface IEsbuildCompiler {
 	outfile: string;
 	mode: ServerMode;
 	compile(): Promise<void>;
+	dispose(): Promise<void>;
 }

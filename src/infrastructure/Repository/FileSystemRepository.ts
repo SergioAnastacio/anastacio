@@ -1,7 +1,8 @@
 // src/Infrastructure/Repository/FileSystemRepository.ts
-import type { IFileSystemRepository } from "../IRepository/IFileSystemRepository.js";
+
 import fs from "node:fs/promises";
 import path from "node:path";
+import type { IFileSystemRepository } from "../IRepository/IFileSystemRepository.js";
 
 export class FileSystemRepository implements IFileSystemRepository {
 	async readFile(filePath: string): Promise<Buffer> {

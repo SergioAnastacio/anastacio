@@ -1,18 +1,19 @@
 // src/infrastructure/compiler/EsbuildCompiler.ts
-import type esbuild from "esbuild";
+
 import { existsSync, watch } from "node:fs";
 import colors from "colors";
+import type esbuild from "esbuild";
 import { type BuildOptions, context } from "esbuild";
-import { ServerMode } from "../webserver/ServerMode.js";
-import type { IEsbuildCompiler } from "./IEsbuildCompiler.js";
-import type { HotReloadServer } from "../websocket/HotReloadServer.js";
-import { formatTime, Timer } from "../../utils/Timer.js";
-import { DevPlugin } from "../../plugins/DevEntry.js";
-import { ProdPlugin } from "../../plugins/ProdEntry.js";
-import { MinifyImagesPlugin } from "../../plugins/MinifyImages.js";
 import { RouterPlugin } from "../../plugins/AppRouter.js";
+import { DevPlugin } from "../../plugins/DevEntry.js";
+import { MinifyImagesPlugin } from "../../plugins/MinifyImages.js";
 import { PostCSSPlugin } from "../../plugins/PostCSSPlugin.js";
+import { ProdPlugin } from "../../plugins/ProdEntry.js";
 import type { AnastacioConfig } from "../../shared/contracts/index.js";
+import { formatTime, Timer } from "../../utils/Timer.js";
+import { ServerMode } from "../webserver/ServerMode.js";
+import type { HotReloadServer } from "../websocket/HotReloadServer.js";
+import type { IEsbuildCompiler } from "./IEsbuildCompiler.js";
 
 export class EsbuildCompiler implements IEsbuildCompiler {
 	public config: AnastacioConfig;
@@ -36,6 +37,7 @@ export class EsbuildCompiler implements IEsbuildCompiler {
 
 	async compile() {
 		this.validateInputs();
+		await this.dispose();
 		const plugins = this.getPlugins();
 		const buildOptions = this.getBuildOptions(plugins);
 
@@ -106,7 +108,7 @@ export class EsbuildCompiler implements IEsbuildCompiler {
 		watch(
 			this.config.paths.srcDir,
 			{ recursive: true, encoding: "utf8" },
-			async (eventType: string, filename: string | null) => {
+			async (_eventType: string, filename: string | null) => {
 				if (filename) {
 					if (filename.replace(/\\/g, "/").endsWith("AppRouter.tsx")) {
 						return;
@@ -132,6 +134,13 @@ export class EsbuildCompiler implements IEsbuildCompiler {
 	}
 
 	private validateInputs(): void {
+		if (!existsSync(this.config.paths.srcDir)) {
+			throw new Error(
+				`Source directory not found: ${this.config.paths.srcDir}. ` +
+					"Create the directory or configure paths.srcDir in anastacio.config.ts.",
+			);
+		}
+
 		if (!existsSync(this.config.paths.entryFile)) {
 			throw new Error(
 				`Entry file not found: ${this.config.paths.entryFile}. ` +
@@ -143,12 +152,18 @@ export class EsbuildCompiler implements IEsbuildCompiler {
 	// Método para compilar el código
 	// ! No existe el método build en la interfaz IEsbuildCompiler
 	// ! Por lo que usamos el método rebuild
+	async dispose(): Promise<void> {
+		if (this.ctx) {
+			await this.ctx.dispose();
+			this.ctx = null;
+		}
+	}
+
 	private async runBuild() {
 		await Timer("Build", async () => {
 			if (this.ctx) {
 				await this.ctx.rebuild();
-				await this.ctx.dispose();
-				this.ctx = null;
+				await this.dispose();
 			}
 		});
 		console.log("Build completed successfully.");

@@ -1,7 +1,8 @@
 // src/applications/use-cases/ServeStaticFile.ts
-import type { IFileSystemRepository } from "../../infrastructure/IRepository/IFileSystemRepository.js";
-import { File } from "../../dominio/entities/File.js";
+
 import path from "node:path";
+import { File } from "../../dominio/entities/File.js";
+import type { IFileSystemRepository } from "../../infrastructure/IRepository/IFileSystemRepository.js";
 
 export class ServeStaticFile {
 	constructor(private fileSystemRepository: IFileSystemRepository) {}

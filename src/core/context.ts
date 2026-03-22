@@ -1,6 +1,9 @@
-import { loadAnastacioConfig } from "./config/index.js";
 import { resolveRoutes } from "../router/index.js";
-import type { AnastacioConfig, RouteDefinition } from "../shared/contracts/index.js";
+import type {
+	AnastacioConfig,
+	RouteDefinition,
+} from "../shared/contracts/index.js";
+import { loadAnastacioConfig } from "./config/index.js";
 
 export interface AnastacioFrameworkContext {
 	rootDir: string;

@@ -6,8 +6,8 @@ export interface IHttpServer {
 	port: number;
 	mode: ServerMode;
 	init(): Promise<void>;
-	start(): void;
+	start(): Promise<void>;
 	notifyClients(): void;
-	closeServers(): void;
+	closeServers(): Promise<void>;
 	handleSessionStop(signal: string): Promise<void>;
 }

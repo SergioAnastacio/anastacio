@@ -94,7 +94,30 @@ Mientras el core de v2 madura, estos scripts siguen disponibles:
 npm run build
 npm run lint
 npm run format
+npm run format:check
 ```
+
+## CI y releases
+
+El repositorio ahora separa validacion y publicacion:
+
+- `ci.yml` valida lint, formato, build y `npm pack --dry-run`
+- `release-npm.yml` publica a npm por tag `v*` o por `workflow_dispatch`
+
+### Requisitos para publicar a npm
+
+Configura este secret en GitHub Actions:
+
+- `NPM_TOKEN`
+
+### Flujo recomendado de release
+
+1. actualizar `package.json` con una version no publicada;
+2. mergear a la rama objetivo;
+3. crear un tag tipo `v0.0.52` y empujarlo al remoto, o lanzar `release-npm.yml` manualmente;
+4. GitHub Actions valida y publica el paquete con provenance.
+
+> Nota: el registro npm ya reporta `anastacio-beta@0.0.51`, asi que antes del siguiente release conviene subir la version local por encima de esa publicada.
 
 ## Contribucion
 

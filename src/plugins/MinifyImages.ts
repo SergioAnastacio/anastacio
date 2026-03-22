@@ -1,19 +1,19 @@
-import type { Plugin } from "esbuild";
 import {
+	copyFileSync,
+	existsSync,
+	mkdirSync,
 	readdirSync,
 	readFileSync,
-	writeFileSync,
-	copyFileSync,
 	rmSync,
-	mkdirSync,
-	existsSync,
 	statSync,
 	utimesSync,
+	writeFileSync,
 } from "node:fs";
-import { join, extname, basename } from "node:path";
+import { basename, extname, join } from "node:path";
+import type { Plugin } from "esbuild";
 import sharp from "sharp";
-import { Timer } from "../utils/Timer.js";
 import type { AnastacioConfig } from "../shared/contracts/index.js";
+import { Timer } from "../utils/Timer.js";
 
 export const MinifyImagesPlugin = (config: AnastacioConfig): Plugin => ({
 	name: "minify-images-plugin",
