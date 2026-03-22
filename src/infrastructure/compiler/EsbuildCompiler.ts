@@ -36,6 +36,7 @@ export class EsbuildCompiler implements IEsbuildCompiler {
 
 	async compile() {
 		this.validateInputs();
+		await this.dispose();
 		const plugins = this.getPlugins();
 		const buildOptions = this.getBuildOptions(plugins);
 
@@ -132,6 +133,13 @@ export class EsbuildCompiler implements IEsbuildCompiler {
 	}
 
 	private validateInputs(): void {
+		if (!existsSync(this.config.paths.srcDir)) {
+			throw new Error(
+				`Source directory not found: ${this.config.paths.srcDir}. ` +
+					"Create the directory or configure paths.srcDir in anastacio.config.ts.",
+			);
+		}
+
 		if (!existsSync(this.config.paths.entryFile)) {
 			throw new Error(
 				`Entry file not found: ${this.config.paths.entryFile}. ` +
@@ -143,12 +151,18 @@ export class EsbuildCompiler implements IEsbuildCompiler {
 	// Método para compilar el código
 	// ! No existe el método build en la interfaz IEsbuildCompiler
 	// ! Por lo que usamos el método rebuild
+	async dispose(): Promise<void> {
+		if (this.ctx) {
+			await this.ctx.dispose();
+			this.ctx = null;
+		}
+	}
+
 	private async runBuild() {
 		await Timer("Build", async () => {
 			if (this.ctx) {
 				await this.ctx.rebuild();
-				await this.ctx.dispose();
-				this.ctx = null;
+				await this.dispose();
 			}
 		});
 		console.log("Build completed successfully.");
