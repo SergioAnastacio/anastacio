@@ -1,94 +1,11 @@
-# .github/workflows/main.yml
-name: main
+name: legacy-main-ci
 
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+  workflow_dispatch:
 
 jobs:
-  hot-cache:
+  migrated:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Cache Node.js modules
-        id: cache-node-modules
-        uses: actions/cache@v3
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '22.10.0'
-
-      - name: Install dependencies
-        run: npm install
-        if: steps.cache-node-modules.outputs.cache-hit != 'true'
-
-  lint-and-format:
-    runs-on: ubuntu-latest
-    needs: [hot-cache]
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Cache Node.js modules
-        id: cache-node-modules
-        uses: actions/cache@v3
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '22.10.0'
-
-      - name: Install dependencies
-        run: npm install
-        if: steps.cache-node-modules.outputs.cache-hit != 'true'
-
-      - name: Lint code
-        run: npm run lint
-
-      - name: Format code
-        run: npm run format
-
-  build:
-    runs-on: ubuntu-latest
-    needs: [hot-cache]
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Cache Node.js modules
-        id: cache-node-modules
-        uses: actions/cache@v3
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '22.10.0'
-
-      - name: Install dependencies
-        run: npm install
-        if: steps.cache-node-modules.outputs.cache-hit != 'true'
-
-      - name: Build project
-        run: npm run build
+      - name: CI migrated to ci.yml
+        run: echo "This workflow has been superseded by .github/workflows/ci.yml"

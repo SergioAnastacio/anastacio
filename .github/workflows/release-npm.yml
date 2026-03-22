@@ -1,0 +1,66 @@
+name: release-npm
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: npm dist-tag to publish under
+        required: true
+        default: latest
+      access:
+        description: npm access level
+        required: true
+        default: public
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.10.0
+          registry-url: 'https://registry.npmjs.org'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Install oxlint Linux binding
+        run: npm install --no-save @oxlint/binding-linux-x64-gnu@1.56.0
+
+      - name: Validate package
+        run: npm run lint && npm run format:check && npm run build
+
+      - name: Verify package version is publishable
+        shell: bash
+        run: |
+          PACKAGE_NAME=$(node -p "require('./package.json').name")
+          PACKAGE_VERSION=$(node -p "require('./package.json').version")
+          PUBLISHED_VERSION=$(npm view "$PACKAGE_NAME" version 2>/dev/null || true)
+          echo "package=$PACKAGE_NAME version=$PACKAGE_VERSION published=${PUBLISHED_VERSION:-<none>}"
+          if [ "$PACKAGE_VERSION" = "$PUBLISHED_VERSION" ]; then
+            echo "Version $PACKAGE_VERSION is already published for $PACKAGE_NAME"
+            exit 1
+          fi
+
+      - name: Publish to npm (manual)
+        if: github.event_name == 'workflow_dispatch'
+        run: npm publish --access "${{ github.event.inputs.access }}" --tag "${{ github.event.inputs.tag }}" --provenance
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish to npm (tag push)
+        if: github.event_name == 'push'
+        run: npm publish --access public --provenance
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
