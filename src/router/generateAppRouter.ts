@@ -1,6 +1,9 @@
 import { existsSync, writeFileSync } from "node:fs";
 import { join, parse, relative, resolve } from "node:path";
-import type { AnastacioConfig, RouteDefinition } from "../shared/contracts/index.js";
+import type {
+	AnastacioConfig,
+	RouteDefinition,
+} from "../shared/contracts/index.js";
 
 const LOADING_FILE_NAMES = ["loading.tsx", "loading.jsx"];
 const NOT_FOUND_FILE_NAMES = [
@@ -61,7 +64,10 @@ export function createAppRouterSource(
 	}
 
 	const groupedLayoutRoutes = Array.from(layoutGroups.entries()).map(
-		([layoutComponent, routeLines]) => `      <Route element={<${layoutComponent} />}>
+		([
+			layoutComponent,
+			routeLines,
+		]) => `      <Route element={<${layoutComponent} />}>
 ${routeLines.join("\n")}
       </Route>`,
 	);

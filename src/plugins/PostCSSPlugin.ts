@@ -1,9 +1,9 @@
+import { readFileSync } from "node:fs";
+import autoprefixer from "autoprefixer";
+import cssnano from "cssnano";
 import type { Plugin } from "esbuild";
 import postcss from "postcss";
 import tailwindcss from "tailwindcss";
-import autoprefixer from "autoprefixer";
-import cssnano from "cssnano";
-import { readFileSync } from "node:fs";
 
 export const PostCSSPlugin = (): Plugin => ({
 	name: "postcss-plugin",

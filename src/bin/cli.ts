@@ -1,13 +1,13 @@
 #!/usr/bin/env node
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { Command } from "commander";
-import { startApp } from "../cli/start.js";
 import { buildApp } from "../cli/build.js";
 import { devApp } from "../cli/dev.js";
-import { inspectApp } from "../cli/inspect.js";
 import { doctorApp } from "../cli/doctor.js";
-import { readFileSync } from "node:fs";
-import { fileURLToPath } from "node:url";
-import { dirname, join } from "node:path";
+import { inspectApp } from "../cli/inspect.js";
+import { startApp } from "../cli/start.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);

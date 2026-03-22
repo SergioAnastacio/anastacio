@@ -1,7 +1,7 @@
-import type { Plugin } from "esbuild";
+import { createHash } from "node:crypto";
 import { promises as fs } from "node:fs";
 import { join } from "node:path";
-import { createHash } from "node:crypto";
+import type { Plugin } from "esbuild";
 import type { AnastacioConfig } from "../shared/contracts/index.js";
 
 export const ProdPlugin = (config: AnastacioConfig): Plugin => ({

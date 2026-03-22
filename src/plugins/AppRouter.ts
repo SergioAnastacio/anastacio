@@ -1,6 +1,6 @@
-import type { Plugin } from "esbuild";
 import { existsSync, mkdirSync } from "node:fs";
 import { relative } from "node:path";
+import type { Plugin } from "esbuild";
 import {
 	resolveRoutes,
 	writeGeneratedAppRouter,

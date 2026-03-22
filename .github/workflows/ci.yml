@@ -1,0 +1,46 @@
+name: ci
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+      - feat/**
+  pull_request:
+    branches:
+      - main
+      - dev
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.10.0
+          cache: npm
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Install oxlint Linux binding
+        run: npm install --no-save @oxlint/binding-linux-x64-gnu@1.56.0
+
+      - name: Lint code
+        run: npm run lint
+
+      - name: Check formatting
+        run: npm run format:check
+
+      - name: Build project
+        run: npm run build
+
+      - name: Pack npm tarball
+        run: npm pack --dry-run

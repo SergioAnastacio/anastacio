@@ -1,6 +1,6 @@
-import type { Plugin } from "esbuild";
 import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+import type { Plugin } from "esbuild";
 import { Timer } from "../utils/Timer.js";
 
 export const MinifyCSSPlugin = (): Plugin => ({

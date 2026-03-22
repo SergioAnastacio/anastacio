@@ -1,6 +1,6 @@
-import { build } from "esbuild";
 import { existsSync, readFileSync } from "node:fs";
 import { isAbsolute, join, resolve } from "node:path";
+import { build } from "esbuild";
 import type {
 	AnastacioConfig,
 	AnastacioUserConfig,
@@ -121,7 +121,10 @@ function resolveAnastacioConfig(
 	userConfig: AnastacioUserConfig,
 ): AnastacioConfig {
 	const srcDir = resolveProjectPath(rootDir, userConfig.paths?.srcDir ?? "src");
-	const outDir = resolveProjectPath(rootDir, userConfig.paths?.outDir ?? "dist");
+	const outDir = resolveProjectPath(
+		rootDir,
+		userConfig.paths?.outDir ?? "dist",
+	);
 	const appDir = resolveProjectPath(
 		rootDir,
 		userConfig.paths?.appDir ?? join(srcDir, "app"),
@@ -160,9 +163,7 @@ function resolveAnastacioConfig(
 }
 
 function resolveProjectPath(projectRoot: string, targetPath: string): string {
-	return isAbsolute(targetPath)
-		? targetPath
-		: resolve(projectRoot, targetPath);
+	return isAbsolute(targetPath) ? targetPath : resolve(projectRoot, targetPath);
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
