@@ -1,6 +1,6 @@
 {
   "name": "anastacio-beta",
-  "version": "0.0.50",
+  "version": "0.0.52",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
@@ -11,7 +11,9 @@
   "scripts": {
     "build": "tsc",
     "lint": "oxlint ./src",
-    "format": "biome format ./src --write"
+    "format": "biome format ./src --write",
+    "format:check": "biome check ./src",
+    "prepublishOnly": "npm run lint && npm run format:check && npm run build"
   },
   "keywords": [],
   "author": "Sergio Anastacio",

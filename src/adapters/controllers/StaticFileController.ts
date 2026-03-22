@@ -1,6 +1,6 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { compressResponse } from "./CompressResponse.js";
 import { serveStaticAsset } from "../../infrastructure/webserver/serveStaticAsset.js";
+import { compressResponse } from "./CompressResponse.js";
 
 export const staticFileController = (rootFolder: string) => {
 	return async (req: IncomingMessage, res: ServerResponse) => {

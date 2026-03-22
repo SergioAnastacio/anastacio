@@ -1,6 +1,9 @@
 import { existsSync, mkdirSync, readdirSync, writeFileSync } from "node:fs";
 import { join, relative, sep } from "node:path";
-import { createFrameworkContext, findAnastacioConfigPath } from "../core/index.js";
+import {
+	createFrameworkContext,
+	findAnastacioConfigPath,
+} from "../core/index.js";
 import { writeRoutesManifest } from "../router/index.js";
 import type {
 	AnastacioConfig,
@@ -254,7 +257,9 @@ function collectDirectoryShapeDiagnostics(
 	walkAppDirectory(config.paths.appDir, (directory) => {
 		const directoryEntries = readdirSync(directory, { withFileTypes: true });
 		const fileNames = new Set(
-			directoryEntries.filter((entry) => entry.isFile()).map((entry) => entry.name),
+			directoryEntries
+				.filter((entry) => entry.isFile())
+				.map((entry) => entry.name),
 		);
 		const relativeDirectory = toProjectRelative(config.rootDir, directory);
 		const pageCount = countKnownFiles(fileNames, PAGE_FILE_NAMES);
@@ -267,10 +272,10 @@ function collectDirectoryShapeDiagnostics(
 			diagnostics.push({
 				code: "MULTIPLE_PAGE_FILES",
 				severity: "error",
-				message: "More than one page file was found in the same route directory.",
+				message:
+					"More than one page file was found in the same route directory.",
 				file: relativeDirectory,
-				suggestion:
-					"Keep a single page.tsx/page.jsx per route directory.",
+				suggestion: "Keep a single page.tsx/page.jsx per route directory.",
 			});
 		}
 
@@ -280,8 +285,7 @@ function collectDirectoryShapeDiagnostics(
 				severity: "error",
 				message: "More than one layout file was found in the same directory.",
 				file: relativeDirectory,
-				suggestion:
-					"Keep a single layout.tsx/layout.jsx per directory.",
+				suggestion: "Keep a single layout.tsx/layout.jsx per directory.",
 			});
 		}
 
@@ -291,8 +295,7 @@ function collectDirectoryShapeDiagnostics(
 				severity: "error",
 				message: "More than one loading file was found in the same directory.",
 				file: relativeDirectory,
-				suggestion:
-					"Keep a single loading.tsx/loading.jsx per directory.",
+				suggestion: "Keep a single loading.tsx/loading.jsx per directory.",
 			});
 		}
 
@@ -300,7 +303,8 @@ function collectDirectoryShapeDiagnostics(
 			diagnostics.push({
 				code: "MULTIPLE_ERROR_FILES",
 				severity: "error",
-				message: "More than one error boundary file was found in the same directory.",
+				message:
+					"More than one error boundary file was found in the same directory.",
 				file: relativeDirectory,
 				suggestion:
 					"Keep a single error.tsx/error.jsx or errorPage.tsx/errorPage.jsx per directory.",
@@ -311,14 +315,19 @@ function collectDirectoryShapeDiagnostics(
 			diagnostics.push({
 				code: "MULTIPLE_NOT_FOUND_FILES",
 				severity: "error",
-				message: "More than one not-found file was found in the same directory.",
+				message:
+					"More than one not-found file was found in the same directory.",
 				file: relativeDirectory,
 				suggestion:
 					"Keep a single notfound.tsx/notfound.jsx or not-found.tsx/not-found.jsx per directory.",
 			});
 		}
 
-		if (isDynamicDirectory(directory) && pageCount === 0 && !hasChildDirectories(directory)) {
+		if (
+			isDynamicDirectory(directory) &&
+			pageCount === 0 &&
+			!hasChildDirectories(directory)
+		) {
 			diagnostics.push({
 				code: "EMPTY_DYNAMIC_ROUTE_DIRECTORY",
 				severity: "warning",
@@ -330,7 +339,11 @@ function collectDirectoryShapeDiagnostics(
 			});
 		}
 
-		if (loadingCount > 0 && pageCount === 0 && !hasChildDirectories(directory)) {
+		if (
+			loadingCount > 0 &&
+			pageCount === 0 &&
+			!hasChildDirectories(directory)
+		) {
 			diagnostics.push({
 				code: "ORPHAN_LOADING_FILE",
 				severity: "warning",
@@ -354,7 +367,11 @@ function collectDirectoryShapeDiagnostics(
 			});
 		}
 
-		if (notFoundCount > 0 && pageCount === 0 && !hasChildDirectories(directory)) {
+		if (
+			notFoundCount > 0 &&
+			pageCount === 0 &&
+			!hasChildDirectories(directory)
+		) {
 			diagnostics.push({
 				code: "ORPHAN_NOT_FOUND_FILE",
 				severity: "warning",
@@ -386,13 +403,17 @@ function collectRouteMetadataDiagnostics(
 			});
 		}
 
-		if (route.hasLoading === false && hasKnownFile(routeDirectory, LOADING_FILE_NAMES)) {
+		if (
+			route.hasLoading === false &&
+			hasKnownFile(routeDirectory, LOADING_FILE_NAMES)
+		) {
 			diagnostics.push({
 				code: "LOADING_METADATA_MISMATCH",
 				severity: "warning",
 				message: `Route "${route.path}" appears to have a loading file that was not reflected in route metadata.`,
 				file: route.file,
-				suggestion: "Review route resolution for loading.tsx inheritance and metadata propagation.",
+				suggestion:
+					"Review route resolution for loading.tsx inheritance and metadata propagation.",
 			});
 		}
 	}

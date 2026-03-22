@@ -1,12 +1,12 @@
 // src/Infrastructure/webserver/HttpServer.ts
 import http from "node:http";
 import { staticFileController } from "../../adapters/controllers/StaticFileController.js";
-import { HotReloadServer } from "../websocket/HotReloadServer.js";
+import type { AnastacioConfig } from "../../shared/contracts/index.js";
+import { FindFreePort } from "../../utils/FindFreePort.js";
 import { EsbuildCompiler } from "../compiler/EsbuildCompiler.js";
+import { HotReloadServer } from "../websocket/HotReloadServer.js";
 import type { IHttpServer } from "./IHttpServer.js";
 import { ServerMode } from "./ServerMode.js";
-import { FindFreePort } from "../../utils/FindFreePort.js";
-import type { AnastacioConfig } from "../../shared/contracts/index.js";
 
 interface HttpServerOverrides {
 	host?: string;
@@ -33,9 +33,7 @@ export class HttpServer implements IHttpServer {
 		this.port = overrides.port ?? config.dev.port;
 		this.wsPort = overrides.wsPort ?? config.dev.wsPort;
 		this.validateRuntimeConfig();
-		this.server = http.createServer(
-			staticFileController(config.paths.outDir),
-		);
+		this.server = http.createServer(staticFileController(config.paths.outDir));
 		this.hotReloadServer =
 			mode === ServerMode.Development
 				? new HotReloadServer(this.wsPort)

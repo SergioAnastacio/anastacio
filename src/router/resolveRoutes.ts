@@ -78,7 +78,9 @@ function createRouteDefinition(
 	return {
 		path: toRoutePath(segments),
 		file: toProjectRelative(config.rootDir, pageFile),
-		...(layoutFile ? { layout: toProjectRelative(config.rootDir, layoutFile) } : {}),
+		...(layoutFile
+			? { layout: toProjectRelative(config.rootDir, layoutFile) }
+			: {}),
 		...(dynamicParams.length > 0 ? { dynamicParams } : {}),
 		hasLoading: hasKnownFile(currentDirectory, LOADING_FILE_NAMES),
 		hasErrorBoundary: hasKnownFile(currentDirectory, ERROR_FILE_NAMES),
@@ -137,7 +139,9 @@ function sortRoutes(left: RouteDefinition, right: RouteDefinition): number {
 		return 1;
 	}
 
-	return left.path.localeCompare(right.path) || left.file.localeCompare(right.file);
+	return (
+		left.path.localeCompare(right.path) || left.file.localeCompare(right.file)
+	);
 }
 
 function normalizePath(value: string): string {

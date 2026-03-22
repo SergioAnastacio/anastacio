@@ -3,11 +3,9 @@ import { WebSocketServer } from "ws";
 
 export class HotReloadServer {
 	private wss: WebSocketServer;
-	private currentPort: number;
 
 	// Crear un servidor WebSocket en el puerto especificado
 	constructor(port: number) {
-		this.currentPort = port;
 		this.wss = new WebSocketServer({ port });
 		this.wss.on("connection", (_ws) => {
 			console.log(`Client connected for hot-reload on port ${port}`);
@@ -33,7 +31,6 @@ export class HotReloadServer {
 	// Cambiar el puerto del servidor WebSocket
 	public async changePort(newPort: number) {
 		this.close();
-		this.currentPort = newPort;
 		this.wss = new WebSocketServer({ port: newPort });
 		this.wss.on("connection", (_ws) => {
 			console.log(`Client connected for hot-reload on port ${newPort}`);

@@ -1,7 +1,4 @@
-import {
-	formatInspectionReport,
-	inspectProject,
-} from "../inspector/index.js";
+import { formatInspectionReport, inspectProject } from "../inspector/index.js";
 
 interface InspectAppOptions {
 	root?: string;

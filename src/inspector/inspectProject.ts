@@ -208,14 +208,16 @@ function writeProjectContext(
 function buildSummary(routes: RouteDefinition[]): InspectionReport["summary"] {
 	return {
 		routeCount: routes.length,
-		dynamicRouteCount: routes.filter((route) => route.dynamicParams?.length).length,
+		dynamicRouteCount: routes.filter((route) => route.dynamicParams?.length)
+			.length,
 		layoutCount: new Set(
 			routes
 				.map((route) => route.layout)
 				.filter((layout): layout is string => Boolean(layout)),
 		).size,
 		routesWithLoading: routes.filter((route) => route.hasLoading).length,
-		routesWithErrorBoundary: routes.filter((route) => route.hasErrorBoundary).length,
+		routesWithErrorBoundary: routes.filter((route) => route.hasErrorBoundary)
+			.length,
 		routesWithNotFound: routes.filter((route) => route.hasNotFound).length,
 	};
 }
